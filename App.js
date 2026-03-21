@@ -1,8 +1,6 @@
-import 'react-native-gesture-handler'; // MUST BE LINE 1
 import React from "react";
 
-
-
+import { useFonts } from 'expo-font';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 
@@ -12,6 +10,14 @@ import AddNewToDoScreen from './src/screens/AddNewToDoScreen';
 const Stack = createStackNavigator();
 
 const App = () => {
+
+  const [loaded] = useFonts({
+    'Pixelpurl': require('./src/assets/fonts/Pixelpurl.ttf'),
+  });
+  if (!loaded) {
+    return null; 
+  }
+
   return (
 
     <NavigationContainer>

@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   Text,
   ImageBackground,
+  Image,
 } from 'react-native';
 
 
@@ -27,7 +28,13 @@ const ToDoButton = ({ label, onPress }) => {
         style={styles.ToDoButtonStyle}
         source={require('../assets/images/button.png')}
       >
-        <Text style={styles.ToDoButtonTextStyle}> {label}</Text>
+        <Image 
+        style = {styles.ToDoButtonPlusIconStyle}
+        source={require('../assets/images/PlusButtonIcon.png')} 
+        /> 
+
+        <Text style={styles.ToDoButtonTextStyle}> {label} </Text>
+
       </ImageBackground>
     </TouchableOpacity>
   );
@@ -102,6 +109,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 25,
     alignItems: 'center',
     justifyContent: 'center',
+    flexDirection: 'row',
     marginVertical: 5,
     marginTop: 10,
     width: 340,
@@ -113,6 +121,12 @@ const styles = StyleSheet.create({
     color: 'black',
     fontSize: 50,
     fontWeight: '600',
+  },
+
+  ToDoButtonPlusIconStyle: {
+    marginBottom: 5,
+    width: 50,
+    height: 50,
   },
 
   TopTitleTextStyle: {
@@ -144,6 +158,7 @@ const styles = StyleSheet.create({
     width: 400,
     height: 45,
   },
+
 });
 
 export default MainHomeScreen;

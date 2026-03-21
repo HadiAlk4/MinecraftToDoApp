@@ -10,11 +10,29 @@ import {
 
 const AddNewToDoScreenMain = ({navigation}) => {
   return (
-    <View style={{ backgroundColor: '#fff', flex: 1 }}>
+    <View style={ToDoStyles.ToDoContainer}>
 
+      <View>
 
+      <Text>"ypo " </Text>
+      
       </View>
+
+    </View>
   );
 };
+
+const ToDoStyles = StyleSheet.create ({
+
+  ToDoContainer: {
+    flex: 1,
+  },
+
+
+
+
+
+});
+
 
 export default AddNewToDoScreenMain;
