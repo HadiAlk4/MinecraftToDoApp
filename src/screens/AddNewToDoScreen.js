@@ -5,20 +5,51 @@ import {
   TextInput,
   StyleSheet,
   TouchableOpacity,
+  ImageBackground,
 } from 'react-native';
 
 
-const AddNewToDoScreenMain = ({navigation}) => {
+const GoBackButton = ({label, onPress}) => {
+
   return (
-    <View style={ToDoStyles.ToDoContainer}>
+    <TouchableOpacity onPress ={onPress}>
 
-      <View>
+      <ImageBackground style={ToDoStyles.GoBackButtonStyle} source={require('../assets/images/GoBackButton.png')} >
 
-      <Text>"ypo " </Text>
+
+      </ImageBackground>
+
+
+    </TouchableOpacity>
+  )
+}
+
+const AddNewToDoScreenMain = ({navigation}) => {
+
+  const GoBackButtonPress = () => {
+    navigation.navigate('Home');
+  }
+
+  return (
+  <View style={ToDoStyles.ToDoContainer}>
+
+    
+
+      <Text> Title </Text> 
+      <TextInput>
+
+      </TextInput>
+
+      <Text> Description </Text> 
+      <TextInput>
+
+      </TextInput>
+
+      <GoBackButton label= "back" onPress={GoBackButtonPress} />
       
-      </View>
+    
 
-    </View>
+  </View>
   );
 };
 
@@ -28,8 +59,27 @@ const ToDoStyles = StyleSheet.create ({
     flex: 1,
   },
 
+  TitleTextStyle: {
 
+  },
 
+  TitleTextInputStyle: {
+
+  },
+
+  DescriptionTextStyle: {
+
+  },
+
+  DescriptionTextInputStyle: {
+
+  },
+
+  GoBackButtonStyle: {
+    transform: [{ rotate: '180deg' }],
+    width: 50,
+    height: 50,
+  },
 
 
 });
