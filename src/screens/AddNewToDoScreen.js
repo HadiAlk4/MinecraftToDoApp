@@ -6,7 +6,23 @@ import {
   StyleSheet,
   TouchableOpacity,
   ImageBackground,
+  Alert,
 } from 'react-native';
+
+
+const SaveButton = ({label, onPress}) => {
+  return (
+
+    <TouchableOpacity onPress ={onPress}>
+
+      <ImageBackground style={ToDoStyles.GoBackButtonStyle} source={require('../assets/images/bookmark.png')} >
+
+
+      </ImageBackground>
+
+    </TouchableOpacity>
+  )
+}
 
 
 const GoBackButton = ({label, onPress}) => {
@@ -27,7 +43,11 @@ const GoBackButton = ({label, onPress}) => {
 const AddNewToDoScreenMain = ({navigation}) => {
 
   const GoBackButtonPress = () => {
-    navigation.navigate('Home');
+    navigation.goBack();
+  }
+
+  const SaveButtonPress = () => {
+    Alert.alert("Save Button Clicked")
   }
 
   return (
@@ -46,6 +66,7 @@ const AddNewToDoScreenMain = ({navigation}) => {
       </TextInput>
 
       <GoBackButton label= "back" onPress={GoBackButtonPress} />
+      <SaveButton label = "Save" onPress={SaveButtonPress} />
       
     
 
@@ -71,13 +92,14 @@ const ToDoStyles = StyleSheet.create ({
   },
 
   TitleTextInputStyle: {
+    fontFamily: 'Pixelpurl',
     height: 50, 
     width: 250,
     borderColor: "#3F51B5",
     borderWidth: 2, 
     borderRadius: 5, 
     paddingHorizontal: 15,
-    fontSize: 16, 
+    fontSize: 20, 
     backgroundColor: "black",
     color: "white",
   },
@@ -93,13 +115,14 @@ const ToDoStyles = StyleSheet.create ({
   },
 
   DescriptionTextInputStyle: {
+    fontFamily: 'Pixelpurl',
     height: 50, 
     width: 250,
     borderColor: "#3F51B5",
     borderWidth: 2, 
     borderRadius: 5, 
     paddingHorizontal: 15, 
-    fontSize: 16, 
+    fontSize: 20, 
     backgroundColor: "black",
     color: "white",
   },
