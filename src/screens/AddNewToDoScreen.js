@@ -10,6 +10,8 @@ import {
 } from 'react-native';
 
 
+
+
 const SaveButton = ({label, onPress}) => {
   return (
 
@@ -23,6 +25,7 @@ const SaveButton = ({label, onPress}) => {
     </TouchableOpacity>
   )
 }
+
 
 
 const GoBackButton = ({label, onPress}) => {
@@ -56,17 +59,28 @@ const AddNewToDoScreenMain = ({navigation}) => {
     
 
       <Text style={ToDoStyles.TitleTextStyle}> Title </Text> 
-      <TextInput style={ToDoStyles.TitleTextInputStyle}>
 
-      </TextInput>
+      <TextInput style={ToDoStyles.TitleTextInputStyle} placeholder='Enter Title Here' />
+
 
       <Text style={ToDoStyles.DescriptionTextStyle}> Description </Text> 
-      <TextInput style={ToDoStyles.DescriptionTextInputStyle}>
 
-      </TextInput>
+      <TextInput 
+      style={ToDoStyles.DescriptionTextInputStyle} 
+      placeholder='Enter Description Here' 
+      placeholderTextColor="white" 
+      multiline={true}
+      
+      /> 
+      
 
-      <GoBackButton label= "back" onPress={GoBackButtonPress} />
-      <SaveButton label = "Save" onPress={SaveButtonPress} />
+  <View style={{ flexDirection: 'row', marginTop: 20, gap: 200 }}>
+    <GoBackButton label="back" onPress={GoBackButtonPress} />
+    <SaveButton label="Save" onPress={SaveButtonPress} />
+  </View>
+
+
+      
       
     
 
@@ -102,6 +116,7 @@ const ToDoStyles = StyleSheet.create ({
     fontSize: 20, 
     backgroundColor: "black",
     color: "white",
+    textAlign: 'center',
   },
 
   DescriptionTextStyle: {
@@ -116,12 +131,13 @@ const ToDoStyles = StyleSheet.create ({
 
   DescriptionTextInputStyle: {
     fontFamily: 'Pixelpurl',
-    height: 50, 
+    minHeight: 50, 
     width: 250,
     borderColor: "#3F51B5",
     borderWidth: 2, 
     borderRadius: 5, 
-    paddingHorizontal: 15, 
+    paddingHorizontal: 15,  
+    paddingVertical: 10,
     fontSize: 20, 
     backgroundColor: "black",
     color: "white",
