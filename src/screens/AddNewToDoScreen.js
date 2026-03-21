@@ -31,17 +31,17 @@ const AddNewToDoScreenMain = ({navigation}) => {
   }
 
   return (
-  <View style={ToDoStyles.ToDoContainer}>
+  <ImageBackground style={ToDoStyles.ToDoContainer} source={require('../assets/images/ScrollBg.png')} resizeMode="stretch">
 
     
 
-      <Text> Title </Text> 
-      <TextInput>
+      <Text style={ToDoStyles.TitleTextStyle}> Title </Text> 
+      <TextInput style={ToDoStyles.TitleTextInputStyle}>
 
       </TextInput>
 
-      <Text> Description </Text> 
-      <TextInput>
+      <Text style={ToDoStyles.DescriptionTextStyle}> Description </Text> 
+      <TextInput style={ToDoStyles.DescriptionTextInputStyle}>
 
       </TextInput>
 
@@ -49,7 +49,7 @@ const AddNewToDoScreenMain = ({navigation}) => {
       
     
 
-  </View>
+  </ImageBackground>
   );
 };
 
@@ -57,22 +57,51 @@ const ToDoStyles = StyleSheet.create ({
 
   ToDoContainer: {
     flex: 1,
+    alignItems: 'center',
   },
 
   TitleTextStyle: {
-
+    fontFamily: 'Pixelpurl',
+    fontSize: 60,
+    color: 'black',
+    fontWeight: 'bold',
+    textAlign: 'center',
+    margin: 10,
+    paddingTop: 30,
   },
 
   TitleTextInputStyle: {
-
+    height: 50, 
+    width: 250,
+    borderColor: "#3F51B5",
+    borderWidth: 2, 
+    borderRadius: 5, 
+    paddingHorizontal: 15,
+    fontSize: 16, 
+    backgroundColor: "black",
+    color: "white",
   },
 
   DescriptionTextStyle: {
-
+    fontFamily: 'Pixelpurl',
+    fontSize: 60,
+    color: 'black',
+    fontWeight: 'bold',
+    textAlign: 'center',
+    margin: 10,
+    padding: 10,
   },
 
   DescriptionTextInputStyle: {
-
+    height: 50, 
+    width: 250,
+    borderColor: "#3F51B5",
+    borderWidth: 2, 
+    borderRadius: 5, 
+    paddingHorizontal: 15, 
+    fontSize: 16, 
+    backgroundColor: "black",
+    color: "white",
   },
 
   GoBackButtonStyle: {
