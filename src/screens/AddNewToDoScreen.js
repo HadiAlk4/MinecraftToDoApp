@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState} from 'react';
 import {
   View,
   Text,
@@ -12,12 +12,13 @@ import {
 
 
 
+
 const SaveButton = ({label, onPress}) => {
   return (
 
     <TouchableOpacity onPress ={onPress}>
 
-      <ImageBackground style={ToDoStyles.GoBackButtonStyle} source={require('../assets/images/bookmark.png')} >
+      <ImageBackground style={ToDoStyles.GoBackAndSaveButtonStyle} source={require('../assets/images/bookmark.png')} >
 
 
       </ImageBackground>
@@ -33,7 +34,7 @@ const GoBackButton = ({label, onPress}) => {
   return (
     <TouchableOpacity onPress ={onPress}>
 
-      <ImageBackground style={ToDoStyles.GoBackButtonStyle} source={require('../assets/images/GoBackButton.png')} >
+      <ImageBackground style={ToDoStyles.GoBackAndSaveButtonStyle} source={require('../assets/images/GoBackButton.png')} >
 
 
       </ImageBackground>
@@ -53,28 +54,48 @@ const AddNewToDoScreenMain = ({navigation}) => {
     Alert.alert("Save Button Clicked")
   }
 
+  const [descText, setDescText] = useState('');
+  const [descHeight, setDescHeight] = useState(50);
+
+  const CHARS_PER_LINE = 29; 
+  const LINE_HEIGHT = 18;
+
+  const handleDescChange = (text) => {
+    setDescText(text);
+    
+    const lines = text.split('\n');
+    
+    // Count wrapped lines too
+    const totalLines = lines.reduce((count, line) => {
+      return count + Math.max(1, Math.ceil(line.length / CHARS_PER_LINE));
+    }, 0);
+
+    setDescHeight(50 + (totalLines - 1) * LINE_HEIGHT);
+  };
+
   return (
   <ImageBackground style={ToDoStyles.ToDoContainer} source={require('../assets/images/ScrollBg.png')} resizeMode="stretch">
 
     
 
-      <Text style={ToDoStyles.TitleTextStyle}> Title </Text> 
+    <Text style={ToDoStyles.TitleTextStyle}> Title </Text> 
 
-      <TextInput style={ToDoStyles.TitleTextInputStyle} placeholder='Enter Title Here' />
+    <TextInput style={ToDoStyles.TitleTextInputStyle} placeholder='Enter Title Here' />
 
 
-      <Text style={ToDoStyles.DescriptionTextStyle}> Description </Text> 
+    <Text style={ToDoStyles.DescriptionTextStyle}> Description </Text> 
 
-      <TextInput 
-      style={ToDoStyles.DescriptionTextInputStyle} 
+    <TextInput 
+      style={[ToDoStyles.DescriptionTextInputStyle, { height: descHeight }]} 
       placeholder='Enter Description Here' 
-      placeholderTextColor="white" 
-      multiline={true}
-      
-      /> 
+      placeholderTextColor="white"
+      multiline
+      value={descText}
+      onChangeText={handleDescChange}
+    />
       
 
-  <View style={{ flexDirection: 'row', marginTop: 20, gap: 200 }}>
+  <View style={{ flexDirection: 'row', marginTop: 20, gap:200, bottom: 200, position: 'absolute', }}>
     <GoBackButton label="back" onPress={GoBackButtonPress} />
     <SaveButton label="Save" onPress={SaveButtonPress} />
   </View>
@@ -131,7 +152,7 @@ const ToDoStyles = StyleSheet.create ({
 
   DescriptionTextInputStyle: {
     fontFamily: 'Pixelpurl',
-    minHeight: 50, 
+    minHeight: 70, 
     width: 250,
     borderColor: "#3F51B5",
     borderWidth: 2, 
@@ -143,10 +164,10 @@ const ToDoStyles = StyleSheet.create ({
     color: "white",
   },
 
-  GoBackButtonStyle: {
+  GoBackAndSaveButtonStyle: {
     transform: [{ rotate: '180deg' }],
-    width: 50,
-    height: 50,
+    width: 70,
+    height: 70,
   },
 
 
