@@ -95,10 +95,20 @@ const AddNewToDoScreenMain = ({navigation}) => {
     />
       
 
-  <View style={{ flexDirection: 'row', marginTop: 20, gap:200, bottom: 200, position: 'absolute', }}>
-    <GoBackButton label="back" onPress={GoBackButtonPress} />
-    <SaveButton label="Save" onPress={SaveButtonPress} />
-  </View>
+
+    <View style={{ flexDirection: 'row', marginTop: 20, gap: 200, bottom: 200, position: 'absolute' }}>
+    
+    <View style={{ alignItems: 'center' }}>
+      <GoBackButton label="back" onPress={GoBackButtonPress} />
+      <Text style={ToDoStyles.ButtonLabelStyle}>Cancel</Text>
+    </View>
+
+    <View style={{ alignItems: 'center' }}>
+      <SaveButton label="Save" onPress={SaveButtonPress} />
+      <Text style={ToDoStyles.ButtonLabelStyle}>Save</Text>
+    </View>
+
+    </View>
 
 
       
@@ -169,6 +179,14 @@ const ToDoStyles = StyleSheet.create ({
     width: 70,
     height: 70,
   },
+
+  ButtonLabelStyle: {
+  fontFamily: 'Pixelpurl',
+  fontSize: 18,
+  color: 'black',
+  marginTop: 5,
+  textAlign: 'center',
+},
 
 
 });
