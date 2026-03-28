@@ -10,6 +10,12 @@ import {
 } from 'react-native';
 
 
+function AddToDoObject (id, title, description, isFinished) {
+  this.id = id;
+  this.title = title;
+  this.description = description;
+  this.isFinished = isFinished;
+}
 
 
 
@@ -51,9 +57,15 @@ const AddNewToDoScreenMain = ({navigation}) => {
   }
 
   const SaveButtonPress = () => {
-    Alert.alert("Save Button Clicked")
+
+    if(titleText == '' || descText == ''){
+      Alert.alert("Fields Cannot be Empty")
+    } else {
+      Alert.alert("Save Button Clicked")
+    }
   }
 
+  const [titleText, setTitleText] = useState('');
   const [descText, setDescText] = useState('');
   const [descHeight, setDescHeight] = useState(50);
 
@@ -80,7 +92,12 @@ const AddNewToDoScreenMain = ({navigation}) => {
 
     <Text style={ToDoStyles.TitleTextStyle}> Title </Text> 
 
-    <TextInput style={ToDoStyles.TitleTextInputStyle} placeholder='Enter Title Here' />
+    <TextInput 
+    style={ToDoStyles.TitleTextInputStyle} 
+    placeholder='Enter Title Here'
+    value={titleText}
+    onChangeText={(text) => setTitleText(text)}
+    />
 
 
     <Text style={ToDoStyles.DescriptionTextStyle}> Description </Text> 
@@ -100,7 +117,7 @@ const AddNewToDoScreenMain = ({navigation}) => {
     
     <View style={{ alignItems: 'center' }}>
       <GoBackButton label="back" onPress={GoBackButtonPress} />
-      <Text style={ToDoStyles.ButtonLabelStyle}>Cancel</Text>
+      <Text style={ToDoStyles.ButtonLabelStyle}>Back</Text>
     </View>
 
     <View style={{ alignItems: 'center' }}>
@@ -109,11 +126,6 @@ const AddNewToDoScreenMain = ({navigation}) => {
     </View>
 
     </View>
-
-
-      
-      
-    
 
   </ImageBackground>
   );
