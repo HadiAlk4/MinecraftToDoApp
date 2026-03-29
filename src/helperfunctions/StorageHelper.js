@@ -1,5 +1,7 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const SaveToDo = async(key, value) => {
+
+export const SaveToDo = async(key, value) => {
     try {
 
         const jasonValue = JSON.stringify(value)
@@ -10,7 +12,7 @@ const SaveToDo = async(key, value) => {
 };
 
 
-const LoadToDo = async(key) => {
+export const LoadToDo = async(key) => {
     try {
         const jasonValue = await AsyncStorage.getItem(key);
         return jasonValue != null ? JSON.parse(jasonValue) : null;
@@ -20,7 +22,7 @@ const LoadToDo = async(key) => {
 };
 
 
-const DeleteToDo = async(key) => {
+export const DeleteToDo = async(key) => {
     try {
         await AsyncStorage.removeItem(key);
     } catch (e) {

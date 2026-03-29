@@ -1,4 +1,5 @@
 import React, {useState} from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   View,
   Text,
@@ -9,6 +10,7 @@ import {
   Alert,
 } from 'react-native';
 
+import { SaveToDo, LoadToDo } from '../helperfunctions/StorageHelper';
 
 function AddToDoObject (id, title, description, isFinished) {
   this.id = id;
@@ -56,12 +58,28 @@ const AddNewToDoScreenMain = ({navigation}) => {
     navigation.goBack();
   }
 
-  const SaveButtonPress = () => {
+  const SaveButtonPress = async () => {
 
     if(titleText == '' || descText == ''){
       Alert.alert("Fields Cannot be Empty")
     } else {
-      Alert.alert("Save Button Clicked")
+      const ToDo = new AddToDoObject (
+        Date.now().toString(),
+        titleText,
+        descText,
+        false
+      );
+      Alert.alert("Save Button Clicked");
+      
+
+      const prevToDos  = await LoadToDo('myToDos') || [];
+
+      const updatedToDo = [...prevToDos, ToDo];
+
+      await SaveToDo('myToDos', updatedToDo); 
+      
+      setDescText('');
+      setTitleText('');
     }
   }
 

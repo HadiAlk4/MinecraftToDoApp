@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 
 import {
   View,
@@ -6,8 +6,11 @@ import {
   TouchableOpacity,
   Text,
   ImageBackground,
-  Image,
+  Image, 
+  FlatList,
 } from 'react-native';
+
+
 
 
 const ToDoItems = ({ ToDoItem }) => {
@@ -44,6 +47,8 @@ const MainHomeScreen = ( { navigation }) => {
   const ToDoButtonPress = () => {
     navigation.navigate('AddToDo');;
   };
+
+  const [ToDos, SetToDos ] = useState([])
 
   return (
     <View style={styles.container}>
