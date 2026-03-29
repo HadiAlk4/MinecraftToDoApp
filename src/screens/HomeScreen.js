@@ -9,6 +9,7 @@ import {
   Image, 
   FlatList,
 } from 'react-native';
+import { LoadToDo } from '../helperfunctions/StorageHelper';
 
 
 
@@ -48,7 +49,20 @@ const MainHomeScreen = ( { navigation }) => {
     navigation.navigate('AddToDo');;
   };
 
-  const [ToDos, SetToDos ] = useState([])
+  const [ToDos, SetToDos ] = useState([]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const savedData = await LoadToDo('myToDos');
+
+      if(savedData){
+        SetToDos(savedData);
+      }
+    };
+    fetchData();
+  }, []);
+
+  console.log(ToDos)
 
   return (
     <View style={styles.container}>
@@ -65,9 +79,21 @@ const MainHomeScreen = ( { navigation }) => {
         style={styles.MainMiddle}
         resizeMode="cover"
       >
-        <ToDoItems ToDoItem="Buy Milk"> </ToDoItems>
+        {/* <ToDoItems ToDoItem="Buy Milk"> </ToDoItems>
         <ToDoItems ToDoItem="Buy Bread"> </ToDoItems>
-        <ToDoItems ToDoItem="Buy Carrot"> </ToDoItems>
+        <ToDoItems ToDoItem="Buy Carrot"> </ToDoItems> */}
+
+
+        <FlatList
+        data={ToDos}
+        style={{ width: '100%', flex: 1 }} // Add this style!
+  contentContainerStyle={{ alignItems: 'center' }} // Keeps items centered
+        keyExtractor={(item) => item.id}
+        renderItem={({item}) => (
+          <ToDoItems ToDoItem={item.title} />
+        )}
+        />
+
       </ImageBackground>
 
       <ImageBackground
