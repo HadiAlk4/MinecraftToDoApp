@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { useFocusEffect } from '@react-navigation/native';
 
 import {
   View,
@@ -6,7 +7,7 @@ import {
   TouchableOpacity,
   Text,
   ImageBackground,
-  Image, 
+  Image,
   FlatList,
 } from 'react-native';
 import { LoadToDo } from '../helperfunctions/StorageHelper';
@@ -14,13 +15,34 @@ import { LoadToDo } from '../helperfunctions/StorageHelper';
 
 
 
-const ToDoItems = ({ ToDoItem }) => {
+const ToDoItems = ({ item }) => {
+
+  const [isExpanded, setIsExpanded] = useState(false);
+
   return (
     <ImageBackground
       source={require('../assets/images/itemsScroll.png')}
       style={styles.ToDoItemsContainer}
     >
-      <Text style={styles.ToDoItems}> {ToDoItem} </Text>
+
+      <ExplandButton 
+      
+      isExpanded={isExpanded}
+      onPress={() => setIsExpanded(!isExpanded)}
+      > </ExplandButton>
+      <Text style={styles.ToDoItems}> {item.title} </Text>
+
+      {isExpanded && (
+        <View style={styles.ExpandedContent}>
+          <Text style={styles.DescriptionText}> {item.description}</Text>
+
+          <View style={styles.TickContent}>
+
+          </View>
+        </View>
+      )}
+
+
     </ImageBackground>
   );
 };
@@ -32,37 +54,53 @@ const ToDoButton = ({ label, onPress }) => {
         style={styles.ToDoButtonStyle}
         source={require('../assets/images/button.png')}
       >
-        <Image 
-        style = {styles.ToDoButtonPlusIconStyle}
-        source={require('../assets/images/PlusButtonIcon.png')} 
-        /> 
+        <Image
+          style={styles.ToDoButtonPlusIconStyle}
+          source={require('../assets/images/PlusButtonIcon.png')}
+        />
 
         <Text style={styles.ToDoButtonTextStyle}> {label} </Text>
+
 
       </ImageBackground>
     </TouchableOpacity>
   );
 };
 
-const MainHomeScreen = ( { navigation }) => {
+
+const ExplandButton = ({ onPress, isExpanded }) => {
+  return (
+    <TouchableOpacity onPress={onPress}>
+      <Image
+        style={{ width: 30, height: 30,  transform: [{ rotate: isExpanded ? '180deg' : '0deg' }]}}
+        source={require('../assets/images/DownCaret.png')} >
+      </Image>
+
+    </TouchableOpacity>
+  );
+};
+
+const MainHomeScreen = ({ navigation }) => {
   const ToDoButtonPress = () => {
     navigation.navigate('AddToDo');;
   };
 
-  const [ToDos, SetToDos ] = useState([]);
+  const [ToDos, SetToDos] = useState([]);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      const savedData = await LoadToDo('myToDos');
+  useFocusEffect(
+    useCallback(() => {
+      const fetchData = async () => {
+        const savedData = await LoadToDo('myToDos');
+        if (savedData) {
+          SetToDos(savedData);
+        }
+      };
 
-      if(savedData){
-        SetToDos(savedData);
-      }
-    };
-    fetchData();
-  }, []);
+      fetchData();
 
-  console.log(ToDos)
+      return () => { };
+    }, [])
+  );
 
   return (
     <View style={styles.container}>
@@ -85,13 +123,13 @@ const MainHomeScreen = ( { navigation }) => {
 
 
         <FlatList
-        data={ToDos}
-        style={{ width: '100%', flex: 1 }} // Add this style!
-  contentContainerStyle={{ alignItems: 'center' }} // Keeps items centered
-        keyExtractor={(item) => item.id}
-        renderItem={({item}) => (
-          <ToDoItems ToDoItem={item.title} />
-        )}
+          data={ToDos}
+          style={{ width: '100%', flex: 1 }}
+          contentContainerStyle={{ alignItems: 'center' }}
+          keyExtractor={(item) => item.id}
+          renderItem={({ item }) => (
+            <ToDoItems item={item} />
+          )}
         />
 
       </ImageBackground>
@@ -181,13 +219,34 @@ const styles = StyleSheet.create({
   },
   ToDoItemsContainer: {
     paddingVertical: 12,
-    paddingHorizontal: 25,
+    paddingHorizontal: 100,
     alignItems: 'center',
     justifyContent: 'center',
+    flexDirection: 'row-reverse',
     marginVertical: 5,
     marginTop: 10,
     width: 400,
-    height: 45,
+    minHeight: 45,
+  },
+  
+  ExpandedContent: {
+    padding: 10,
+    width: '100%',
+    alignItems: 'center',
+  },
+  DescriptionText: {
+    fontFamily: 'Pixelpurl',
+    fontSize: 18,
+    color: 'black',
+    textAlign: 'left',
+    marginTop: 5,
+    paddingHorizontal: 10,
+  },
+  TickContent: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    width: '100%',
+    marginTop: 10,
   },
 
 });
