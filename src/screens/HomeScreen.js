@@ -20,21 +20,21 @@ const ToDoItems = ({ item }) => {
   const [isExpanded, setIsExpanded] = useState(false);
 
   return (
-    <ImageBackground
-      source={require('../assets/images/itemsScroll.png')}
+    <View
       style={styles.ToDoItemsContainer}
     >
 
+      <View style={styles.CaretWrapper}>
       <ExplandButton 
-      
       isExpanded={isExpanded}
       onPress={() => setIsExpanded(!isExpanded)}
       > </ExplandButton>
-      <Text style={styles.ToDoItems}> {item.title} </Text>
+      </View>
+      <Text style={styles.ToDoItems}>{item.title}</Text>
 
       {isExpanded && (
         <View style={styles.ExpandedContent}>
-          <Text style={styles.DescriptionText}> {item.description}</Text>
+          <Text style={styles.DescriptionText}>{item.description}</Text>
 
           <View style={styles.TickContent}>
 
@@ -43,7 +43,7 @@ const ToDoItems = ({ item }) => {
       )}
 
 
-    </ImageBackground>
+    </View>
   );
 };
 
@@ -214,25 +214,37 @@ const styles = StyleSheet.create({
     color: 'black',
     fontWeight: 'bold',
     textAlign: 'center',
-    width: '90%',
+    width: '80%',
     borderRadius: 10,
   },
   ToDoItemsContainer: {
+    width: 330,             
+    backgroundColor: '#F4EBD0', 
+    borderWidth: 3,           
+    borderColor: 'black',
     paddingVertical: 12,
-    paddingHorizontal: 100,
+    paddingHorizontal: 20,    
     alignItems: 'center',
     justifyContent: 'center',
-    flexDirection: 'row-reverse',
     marginVertical: 5,
     marginTop: 10,
-    width: 400,
-    minHeight: 45,
+    alignSelf: 'center',      
+  },
+
+  CaretWrapper: {
+    position: 'absolute',
+    right: 10,
+    top: 10,
+    zIndex: 1,               
   },
   
   ExpandedContent: {
     padding: 10,
     width: '100%',
-    alignItems: 'center',
+    alignItems: 'flex-start',
+    borderTopWidth: 1,        
+    borderTopColor: 'rgba(0,0,0,0.1)',
+    marginTop: 10,
   },
   DescriptionText: {
     fontFamily: 'Pixelpurl',
