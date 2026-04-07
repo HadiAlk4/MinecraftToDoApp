@@ -98,6 +98,13 @@ const ExplandButton = ({ onPress, isExpanded }) => {
 };
 
 const MainHomeScreen = ({ navigation }) => {
+
+  const getCatMood = () => {
+    return ToDos.length > 2 
+    ? require('../assets/catGifs/catMood2.gif') : require ('../assets/catGifs/catMood1.gif');
+  }
+
+
   const ToDoButtonPress = () => {
     navigation.navigate('AddToDo');;
   };
@@ -178,6 +185,8 @@ const MainHomeScreen = ({ navigation }) => {
         resizeMode="cover"
         style={styles.BottomDisplay}
       >
+        <Image source={getCatMood()} style={styles.catMoodStyle} />
+
         <ToDoButton label="Add ToDo" onPress={ToDoButtonPress} />
       </ImageBackground>
     </View>
@@ -303,6 +312,16 @@ const styles = StyleSheet.create({
     width: 40, 
     height: 40, 
     resizeMode: 'contain' 
+  },
+
+  catMoodStyle: {
+    width: 90,
+    height: 90,
+    position: 'absolute',
+    top: -85,     
+    left: 20,      
+    zIndex: 5,
+    resizeMode: 'contain',
   },
 
 });
