@@ -10,12 +10,12 @@ import {
   Image,
   FlatList,
 } from 'react-native';
-import { LoadToDo } from '../helperfunctions/StorageHelper';
+import { LoadToDo, SaveToDo } from '../helperfunctions/StorageHelper';
 
 
 
 
-const ToDoItems = ({ item }) => {
+const ToDoItems = ({ item, onDelete, onToggleComplete }) => {
 
   const [isExpanded, setIsExpanded] = useState(false);
 
@@ -30,13 +30,30 @@ const ToDoItems = ({ item }) => {
       onPress={() => setIsExpanded(!isExpanded)}
       > </ExplandButton>
       </View>
-      <Text style={styles.ToDoItems}>{item.title}</Text>
+      <Text style={[styles.ToDoItems, {color: item.isFinished ? '#888' : 'black', textDecorationLine: item.isFinished ? 'line-through' : 'none'}]}>{item.title}</Text>
 
       {isExpanded && (
         <View style={styles.ExpandedContent}>
           <Text style={styles.DescriptionText}>{item.description}</Text>
 
           <View style={styles.TickContent}>
+            <TouchableOpacity onPress={() => onDelete(item.id)}> 
+              <Image
+              source={require('../assets/images/DeleteCheckmark.png')} 
+              style={styles.actionIcon}
+              >
+
+              </Image>
+            </TouchableOpacity>
+
+            {!item.isFinished && (
+              <TouchableOpacity onPress={() => onToggleComplete(item.id)}>
+                <Image
+                source={require('../assets/images/Checkmark.png')} 
+                style={styles.actionIcon}
+                />
+              </TouchableOpacity>
+            )}
 
           </View>
         </View>
@@ -102,6 +119,27 @@ const MainHomeScreen = ({ navigation }) => {
     }, [])
   );
 
+
+
+  const handleDelete = async (id) => {
+    const updatedList = ToDos.filter(todo => todo.id !== id);
+    await SaveToDo('myToDos', updatedList);
+    SetToDos(updatedList);
+  }
+
+  const handleToggleComplete = async (id) => {
+    const updatedList = ToDos.map(todo => {
+      if(todo.id === id){
+        return {...todo, isFinished: true};
+      }
+      return todo;
+    });
+
+    await SaveToDo('myToDos', updatedList);
+    SetToDos(updatedList);
+  }
+
+
   return (
     <View style={styles.container}>
       <ImageBackground // Top Footer
@@ -117,10 +155,7 @@ const MainHomeScreen = ({ navigation }) => {
         style={styles.MainMiddle}
         resizeMode="cover"
       >
-        {/* <ToDoItems ToDoItem="Buy Milk"> </ToDoItems>
-        <ToDoItems ToDoItem="Buy Bread"> </ToDoItems>
-        <ToDoItems ToDoItem="Buy Carrot"> </ToDoItems> */}
-
+        
 
         <FlatList
           data={ToDos}
@@ -128,7 +163,11 @@ const MainHomeScreen = ({ navigation }) => {
           contentContainerStyle={{ alignItems: 'center' }}
           keyExtractor={(item) => item.id}
           renderItem={({ item }) => (
-            <ToDoItems item={item} />
+            <ToDoItems 
+            item={item}
+            onDelete={handleDelete} 
+            onToggleComplete={handleToggleComplete}
+            />
           )}
         />
 
@@ -259,6 +298,11 @@ const styles = StyleSheet.create({
     justifyContent: 'space-around',
     width: '100%',
     marginTop: 10,
+  },
+  actionIcon: {
+    width: 40, 
+    height: 40, 
+    resizeMode: 'contain' 
   },
 
 });
