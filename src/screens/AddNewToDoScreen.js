@@ -8,10 +8,10 @@ import {
   ImageBackground,
   ScrollView,
   Switch,
-  Alert,
 } from 'react-native';
 
 import { SaveToDo, LoadToDo } from '../helperfunctions/StorageHelper';
+import { notify } from '../helperfunctions/notify';
 import { isValidDue } from '../calendar/eventPayload';
 import { useGoogleCalendar } from '../calendar/GoogleCalendarProvider';
 
@@ -69,7 +69,7 @@ const AddNewToDoScreenMain = ({navigation}) => {
   const SaveButtonPress = async () => {
 
     if(titleText == '' || descText == ''){
-      Alert.alert("Fields Cannot be Empty")
+      notify('Fields Cannot be Empty')
       return;
     }
 
@@ -78,17 +78,17 @@ const AddNewToDoScreenMain = ({navigation}) => {
     const hasDue = dueDate !== '' || dueTime !== '';
 
     if (hasDue && !isValidDue(dueDate, dueTime)) {
-      Alert.alert('Check the due date', 'Use YYYY-MM-DD and HH:MM, or leave both blank.');
+      notify('Check the due date', 'Use YYYY-MM-DD and HH:MM, or leave both blank.');
       return;
     }
 
     if (addToCalendar && !hasDue) {
-      Alert.alert('Add a due date', 'Google Calendar needs a date and time.');
+      notify('Add a due date', 'Google Calendar needs a date and time.');
       return;
     }
 
     if (addToCalendar && !isConnected) {
-      Alert.alert('Connect Google Calendar', 'Open Calendar from the home screen and sign in, then save again.');
+      notify('Connect Google Calendar', 'Open Calendar from the home screen and sign in, then save again.');
       return;
     }
 
@@ -106,7 +106,7 @@ const AddNewToDoScreenMain = ({navigation}) => {
         }
         calendarEventId = created.id;
       } catch (error) {
-        Alert.alert('Calendar', error.message || 'Could not create the calendar event.');
+        notify('Calendar', error.message || 'Could not create the calendar event.');
         return;
       }
     }
@@ -125,7 +125,7 @@ const AddNewToDoScreenMain = ({navigation}) => {
     const updatedToDo = [...prevToDos, ToDo];
     await SaveToDo('myToDos', updatedToDo);
 
-    Alert.alert(calendarEventId ? 'Saved to your list and Google Calendar' : 'Saved');
+    notify(calendarEventId ? 'Saved to your list and Google Calendar' : 'Saved');
     setDescText('');
     setTitleText('');
     setDueDateText('');

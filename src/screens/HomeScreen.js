@@ -9,9 +9,9 @@ import {
   ImageBackground,
   Image,
   FlatList,
-  Alert,
 } from 'react-native';
 import { LoadToDo, SaveToDo } from '../helperfunctions/StorageHelper';
+import { notify } from '../helperfunctions/notify';
 import { formatDueLabel } from '../calendar/eventPayload';
 import { useGoogleCalendar } from '../calendar/GoogleCalendarProvider';
 
@@ -161,7 +161,7 @@ const MainHomeScreen = ({ navigation }) => {
       try {
         await removeEvent(target.calendarEventId);
       } catch (error) {
-        Alert.alert(
+        notify(
           'Removed from the list',
           error.message || 'The Google Calendar event is still on your calendar.',
         );
