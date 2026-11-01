@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useLayoutEffect } from 'react';
+import React, { useState, useCallback, useLayoutEffect } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
 
 import {
@@ -9,8 +9,11 @@ import {
   ImageBackground,
   Image,
   FlatList,
+  Alert,
 } from 'react-native';
 import { LoadToDo, SaveToDo } from '../helperfunctions/StorageHelper';
+import { formatDueLabel } from '../calendar/eventPayload';
+import { useGoogleCalendar } from '../calendar/GoogleCalendarProvider';
 
 
 
@@ -31,6 +34,12 @@ const ToDoItems = ({ item, onDelete, onToggleComplete }) => {
       > </ExplandButton>
       </View>
       <Text style={[styles.ToDoItems, {color: item.isFinished ? '#888' : 'black', textDecorationLine: item.isFinished ? 'line-through' : 'none'}]}>{item.title}</Text>
+      {!!formatDueLabel(item.dueDate, item.dueTime) && (
+        <Text style={styles.DueText}>Due {formatDueLabel(item.dueDate, item.dueTime)}</Text>
+      )}
+      {!!item.calendarEventId && (
+        <Text style={styles.CalendarBadge}>On Google Calendar</Text>
+      )}
 
       {isExpanded && (
         <View style={styles.ExpandedContent}>
@@ -123,6 +132,7 @@ const MainHomeScreen = ({ navigation }) => {
   };
 
   const [ToDos, SetToDos] = useState([]);
+  const { removeEvent } = useGoogleCalendar();
 
   useFocusEffect(
     useCallback(() => {
@@ -142,9 +152,21 @@ const MainHomeScreen = ({ navigation }) => {
 
 
   const handleDelete = async (id) => {
+    const target = ToDos.find(todo => todo.id === id);
     const updatedList = ToDos.filter(todo => todo.id !== id);
     await SaveToDo('myToDos', updatedList);
     SetToDos(updatedList);
+
+    if (target?.calendarEventId) {
+      try {
+        await removeEvent(target.calendarEventId);
+      } catch (error) {
+        Alert.alert(
+          'Removed from the list',
+          error.message || 'The Google Calendar event is still on your calendar.',
+        );
+      }
+    }
   }
 
   const handleToggleComplete = async (id) => {
@@ -277,6 +299,22 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     width: '80%',
     borderRadius: 10,
+  },
+
+  DueText: {
+    fontFamily: 'Pixelpurl',
+    fontSize: 14,
+    color: '#333',
+    marginTop: 4,
+    textAlign: 'center',
+  },
+
+  CalendarBadge: {
+    fontFamily: 'Pixelpurl',
+    fontSize: 14,
+    color: '#3F51B5',
+    marginTop: 2,
+    textAlign: 'center',
   },
   ToDoItemsContainer: {
     width: 330,             
