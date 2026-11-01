@@ -3,13 +3,13 @@ import { useFocusEffect } from '@react-navigation/native';
 import {
   ActivityIndicator,
   FlatList,
-  ImageBackground,
   Linking,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from 'react-native';
+import ImageBackground from '../components/FillImageBackground';
 
 import { formatEventStart } from '../calendar/eventPayload';
 import { useGoogleCalendar } from '../calendar/GoogleCalendarProvider';

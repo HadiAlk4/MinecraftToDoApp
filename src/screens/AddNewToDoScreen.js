@@ -5,10 +5,10 @@ import {
   TextInput,
   StyleSheet,
   TouchableOpacity,
-  ImageBackground,
   ScrollView,
   Switch,
 } from 'react-native';
+import ImageBackground from '../components/FillImageBackground';
 
 import { SaveToDo, LoadToDo } from '../helperfunctions/StorageHelper';
 import { notify } from '../helperfunctions/notify';

@@ -6,10 +6,10 @@ import {
   StyleSheet,
   TouchableOpacity,
   Text,
-  ImageBackground,
   Image,
   FlatList,
 } from 'react-native';
+import ImageBackground from '../components/FillImageBackground';
 import { LoadToDo, SaveToDo } from '../helperfunctions/StorageHelper';
 import { notify } from '../helperfunctions/notify';
 import { isDemoEventId } from '../calendar/demoCalendar';
