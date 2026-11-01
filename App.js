@@ -6,6 +6,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 
 import HomeScreen from './src/screens/HomeScreen';
 import AddNewToDoScreen from './src/screens/AddNewToDoScreen';
+import { GoogleCalendarProvider } from './src/calendar/GoogleCalendarProvider';
 
 const Stack = createStackNavigator();
 
@@ -19,16 +20,14 @@ const App = () => {
   }
 
   return (
-
-    <NavigationContainer>
-      
-      <Stack.Navigator initialRouteName="Home">
-      <Stack.Screen name="Home" component={HomeScreen} />
-      <Stack.Screen name="AddToDo" component={AddNewToDoScreen} />
+    <GoogleCalendarProvider>
+      <NavigationContainer>
+        <Stack.Navigator initialRouteName="Home">
+          <Stack.Screen name="Home" component={HomeScreen} />
+          <Stack.Screen name="AddToDo" component={AddNewToDoScreen} />
         </Stack.Navigator>
-
-    </NavigationContainer>
-
+      </NavigationContainer>
+    </GoogleCalendarProvider>
   );
 };
 
