@@ -18,7 +18,6 @@ const CalendarScreen = () => {
   const {
     ready,
     isDemo,
-    isConfigured,
     isConnected,
     email,
     errorMessage,
@@ -122,12 +121,6 @@ const CalendarScreen = () => {
               </Text>
             )}
 
-            {!isDemo && !isConfigured && (
-              <Text style={styles.help}>
-                Set EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID to a Google OAuth client with the Calendar events scope. Phone builds also need EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID and EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID. Allow the redirect mytodom2://oauthredirect.
-              </Text>
-            )}
-
             {!!errorMessage && <Text style={styles.error}>{errorMessage}</Text>}
             {!!listError && <Text style={styles.error}>{listError}</Text>}
 
@@ -140,7 +133,7 @@ const CalendarScreen = () => {
                 source={require('../assets/images/button.png')}
               >
                 <Text style={styles.actionText}>
-                  {busy ? 'Wait' : isConnected ? 'Sign out' : 'Sign in'}
+                  {busy ? 'Wait' : isConnected ? 'Sign out' : isDemo ? 'Sign in' : 'Sign in with Google'}
                 </Text>
               </ImageBackground>
             </TouchableOpacity>

@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
-import { resolveGoogleClientIds } from './googleConfig.js';
+import { resolveGoogleClientIds, shouldUseDemoSignIn } from './googleConfig.js';
 
 test('prefers environment client ids over app.json extra', () => {
   const ids = resolveGoogleClientIds({
@@ -25,6 +25,11 @@ test('falls back to the web client id on Android', () => {
   });
 
   assert.equal(ids.platformClientId, 'web-client');
+});
+
+test('keeps Google Calendar when a client id is configured', () => {
+  assert.equal(shouldUseDemoSignIn({ isConfigured: true }), false);
+  assert.equal(shouldUseDemoSignIn({ isConfigured: false }), true);
 });
 
 test('reports unconfigured when every client id is blank', () => {

@@ -19,7 +19,7 @@ import {
 } from './demoCalendar';
 import { loadDemoEvents, saveDemoEvents } from './demoStore';
 import { buildCalendarEvent } from './eventPayload';
-import { resolveGoogleClientIds } from './googleConfig';
+import { resolveGoogleClientIds, shouldUseDemoSignIn } from './googleConfig';
 import { clearCalendarAuth, loadCalendarAuth, saveCalendarAuth } from './tokenStore';
 
 WebBrowser.maybeCompleteAuthSession();
@@ -67,7 +67,7 @@ function authFromAuthentication(authentication, previous) {
 export function GoogleCalendarProvider({ children }) {
   const ids = useMemo(() => readClientIds(), []);
   const platformClientId = ids.platformClientId;
-  const isDemo = Platform.OS === 'web' || !ids.isConfigured;
+  const isDemo = shouldUseDemoSignIn({ isConfigured: ids.isConfigured });
 
   const [request, response, promptAsync] = Google.useAuthRequest({
     clientId: platformClientId || 'unconfigured',

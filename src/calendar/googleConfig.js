@@ -24,3 +24,7 @@ export function resolveGoogleClientIds({ env = {}, extra = {}, platform = 'web' 
     isConfigured: Boolean(platformClientId),
   };
 }
+
+export function shouldUseDemoSignIn({ isConfigured }) {
+  return !isConfigured;
+}
