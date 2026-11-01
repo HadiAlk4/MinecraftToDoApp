@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
-import { buildCalendarEvent, formatDueLabel, isValidDue } from './eventPayload.js';
+import { buildCalendarEvent, formatDueLabel, formatEventStart, isValidDue } from './eventPayload.js';
 
 test('accepts a real calendar date and 24-hour time', () => {
   assert.equal(isValidDue('2026-11-02', '09:05'), true);
@@ -55,4 +55,10 @@ test('rejects an event with no title', () => {
 test('formats the due label shown on a to-do', () => {
   assert.equal(formatDueLabel('2026-11-02', '14:30'), '2026-11-02 14:30');
   assert.equal(formatDueLabel('', ''), '');
+});
+
+test('leaves all-day event dates unchanged and ignores unreadable times', () => {
+  assert.equal(formatEventStart('2026-11-02'), '2026-11-02');
+  assert.equal(formatEventStart('not-a-date'), 'not-a-date');
+  assert.equal(formatEventStart(''), '');
 });

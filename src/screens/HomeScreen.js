@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useLayoutEffect } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
 
 import {
@@ -98,6 +98,19 @@ const ExplandButton = ({ onPress, isExpanded }) => {
 };
 
 const MainHomeScreen = ({ navigation }) => {
+
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      headerRight: () => (
+        <TouchableOpacity
+          onPress={() => navigation.navigate('Calendar')}
+          style={{ paddingRight: 12 }}
+        >
+          <Text style={{ fontFamily: 'Pixelpurl', fontSize: 20, color: 'black' }}>Calendar</Text>
+        </TouchableOpacity>
+      ),
+    });
+  }, [navigation]);
 
   const getCatMood = () => {
     return ToDos.length > 2 

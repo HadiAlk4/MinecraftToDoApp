@@ -6,6 +6,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 
 import HomeScreen from './src/screens/HomeScreen';
 import AddNewToDoScreen from './src/screens/AddNewToDoScreen';
+import CalendarScreen from './src/screens/CalendarScreen';
 import { GoogleCalendarProvider } from './src/calendar/GoogleCalendarProvider';
 
 const Stack = createStackNavigator();
@@ -25,6 +26,7 @@ const App = () => {
         <Stack.Navigator initialRouteName="Home">
           <Stack.Screen name="Home" component={HomeScreen} />
           <Stack.Screen name="AddToDo" component={AddNewToDoScreen} />
+          <Stack.Screen name="Calendar" component={CalendarScreen} options={{ title: 'Calendar' }} />
         </Stack.Navigator>
       </NavigationContainer>
     </GoogleCalendarProvider>

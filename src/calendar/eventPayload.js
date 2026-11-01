@@ -91,3 +91,19 @@ export function formatDueLabel(dueDate, dueTime) {
   }
   return dueDate || dueTime;
 }
+
+export function formatEventStart(start) {
+  if (!start || !String(start).includes('T')) {
+    return start || '';
+  }
+  const date = new Date(start);
+  if (Number.isNaN(date.getTime())) {
+    return start;
+  }
+  return new Intl.DateTimeFormat(undefined, {
+    month: 'short',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+  }).format(date);
+}
