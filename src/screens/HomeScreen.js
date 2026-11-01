@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import { LoadToDo, SaveToDo } from '../helperfunctions/StorageHelper';
 import { notify } from '../helperfunctions/notify';
+import { isDemoEventId } from '../calendar/demoCalendar';
 import { formatDueLabel } from '../calendar/eventPayload';
 import { useGoogleCalendar } from '../calendar/GoogleCalendarProvider';
 
@@ -38,7 +39,9 @@ const ToDoItems = ({ item, onDelete, onToggleComplete }) => {
         <Text style={styles.DueText}>Due {formatDueLabel(item.dueDate, item.dueTime)}</Text>
       )}
       {!!item.calendarEventId && (
-        <Text style={styles.CalendarBadge}>On Google Calendar</Text>
+        <Text style={styles.CalendarBadge}>
+          {isDemoEventId(item.calendarEventId) ? 'On demo calendar' : 'On Google Calendar'}
+        </Text>
       )}
 
       {isExpanded && (

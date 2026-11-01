@@ -17,12 +17,14 @@ import { useGoogleCalendar } from '../calendar/GoogleCalendarProvider';
 const CalendarScreen = () => {
   const {
     ready,
+    isDemo,
     isConfigured,
     isConnected,
     email,
     errorMessage,
     connect,
     disconnect,
+    resetDemo,
     loadUpcoming,
   } = useGoogleCalendar();
 
@@ -68,6 +70,12 @@ const CalendarScreen = () => {
   const onConnectPress = async () => {
     setBusy(true);
     try {
+      if (isDemo && isConnected) {
+        const items = await resetDemo();
+        setEvents(items);
+        setListError('');
+        return;
+      }
       await connect();
     } finally {
       setBusy(false);
@@ -110,12 +118,20 @@ const CalendarScreen = () => {
         ) : (
           <View style={styles.panel}>
             <Text style={styles.status}>
-              {isConnected
-                ? `Signed in${email ? ` as ${email}` : ''}`
-                : 'Not connected'}
+              {isDemo && isConnected
+                ? 'Demo calendar'
+                : isConnected
+                  ? `Signed in${email ? ` as ${email}` : ''}`
+                  : 'Not connected'}
             </Text>
 
-            {!isConfigured && (
+            {isDemo && (
+              <Text style={styles.help}>
+                Events stay in this browser. Nothing is sent to Google.
+              </Text>
+            )}
+
+            {!isDemo && !isConfigured && (
               <Text style={styles.help}>
                 Set EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID to a Google OAuth client with the Calendar events scope. Phone builds also need EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID and EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID. Allow the redirect mytodom2://oauthredirect.
               </Text>
@@ -125,7 +141,7 @@ const CalendarScreen = () => {
             {!!listError && <Text style={styles.error}>{listError}</Text>}
 
             <TouchableOpacity
-              onPress={isConnected ? onDisconnectPress : onConnectPress}
+              onPress={isDemo || !isConnected ? onConnectPress : onDisconnectPress}
               disabled={busy}
             >
               <ImageBackground
@@ -133,7 +149,11 @@ const CalendarScreen = () => {
                 source={require('../assets/images/button.png')}
               >
                 <Text style={styles.actionText}>
-                  {busy ? 'Wait' : isConnected ? 'Disconnect' : 'Connect'}
+                  {busy
+                    ? 'Wait'
+                    : isDemo
+                      ? (isConnected ? 'Reset demo' : 'Start demo')
+                      : (isConnected ? 'Disconnect' : 'Connect')}
                 </Text>
               </ImageBackground>
             </TouchableOpacity>
@@ -143,7 +163,9 @@ const CalendarScreen = () => {
             )}
 
             {isConnected && !loadingEvents && events.length === 0 && !listError && (
-              <Text style={styles.help}>Nothing coming up on your primary calendar.</Text>
+              <Text style={styles.help}>
+                {isDemo ? 'Nothing coming up in the demo.' : 'Nothing coming up on your primary calendar.'}
+              </Text>
             )}
 
             <FlatList

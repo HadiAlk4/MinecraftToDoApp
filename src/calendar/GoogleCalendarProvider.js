@@ -1,4 +1,4 @@
-import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { Platform } from 'react-native';
 import Constants from 'expo-constants';
 import * as AuthSession from 'expo-auth-session';
@@ -12,6 +12,13 @@ import {
   fetchGoogleAccount,
   listUpcomingEvents,
 } from './GoogleCalendarApi';
+import {
+  addTodoToDemoCalendar,
+  listUpcomingDemoEvents,
+  removeDemoEvent,
+  seedDemoEvents,
+} from './demoCalendar';
+import { loadDemoEvents, saveDemoEvents } from './demoStore';
 import { buildCalendarEvent } from './eventPayload';
 import { resolveGoogleClientIds } from './googleConfig';
 import { clearCalendarAuth, loadCalendarAuth, saveCalendarAuth } from './tokenStore';
@@ -32,6 +39,27 @@ function readClientIds() {
   });
 }
 
+function demoSession() {
+  return {
+    accessToken: 'demo',
+    refreshToken: '',
+    expiresAt: Date.now() + 365 * 24 * 60 * 60 * 1000,
+    email: 'Demo visitor',
+    name: 'Demo',
+    demo: true,
+  };
+}
+
+async function ensureDemoSeed() {
+  const existing = await loadDemoEvents();
+  if (existing) {
+    return existing;
+  }
+  const seeded = seedDemoEvents();
+  await saveDemoEvents(seeded);
+  return seeded;
+}
+
 function authFromAuthentication(authentication, previous) {
   const expiresIn = authentication?.expiresIn ?? 3600;
   return {
@@ -46,6 +74,8 @@ function authFromAuthentication(authentication, previous) {
 export function GoogleCalendarProvider({ children }) {
   const ids = useMemo(() => readClientIds(), []);
   const platformClientId = ids.platformClientId;
+  const isDemo = Platform.OS === 'web' || !ids.isConfigured;
+  const leftDemo = useRef(false);
 
   const [request, response, promptAsync] = Google.useAuthRequest({
     clientId: platformClientId || 'unconfigured',
@@ -67,7 +97,26 @@ export function GoogleCalendarProvider({ children }) {
     const restore = async () => {
       try {
         const stored = await loadCalendarAuth();
-        if (!active || !stored) {
+        if (!active) {
+          return;
+        }
+        if (isDemo) {
+          if (stored?.demo && stored.expiresAt > Date.now()) {
+            await ensureDemoSeed();
+            setAuth(stored);
+            return;
+          }
+          if (Platform.OS === 'web' && !leftDemo.current) {
+            const next = demoSession();
+            await saveCalendarAuth(next);
+            await ensureDemoSeed();
+            if (active) {
+              setAuth(next);
+            }
+          }
+          return;
+        }
+        if (!stored) {
           return;
         }
         if (stored.expiresAt > Date.now() + 30000) {
@@ -100,7 +149,7 @@ export function GoogleCalendarProvider({ children }) {
     return () => {
       active = false;
     };
-  }, [platformClientId]);
+  }, [isDemo, platformClientId]);
 
   useEffect(() => {
     if (!response) {
@@ -143,6 +192,15 @@ export function GoogleCalendarProvider({ children }) {
   }, [response]);
 
   const connect = useCallback(async () => {
+    if (isDemo) {
+      const next = demoSession();
+      await saveCalendarAuth(next);
+      await ensureDemoSeed();
+      leftDemo.current = false;
+      setAuth(next);
+      setErrorMessage('');
+      return { ok: true, reason: 'demo' };
+    }
     if (!platformClientId) {
       setErrorMessage('Add a Google OAuth client ID before connecting Calendar.');
       return { ok: false, reason: 'unconfigured' };
@@ -154,13 +212,17 @@ export function GoogleCalendarProvider({ children }) {
     setErrorMessage('');
     const result = await promptAsync();
     return { ok: result.type === 'success', reason: result.type };
-  }, [platformClientId, promptAsync, request]);
+  }, [isDemo, platformClientId, promptAsync, request]);
 
   const disconnect = useCallback(async () => {
     const token = auth?.accessToken;
+    const wasDemo = Boolean(auth?.demo);
+    if (wasDemo) {
+      leftDemo.current = true;
+    }
     setAuth(null);
     await clearCalendarAuth();
-    if (!token) {
+    if (!token || wasDemo) {
       return;
     }
     try {
@@ -180,30 +242,63 @@ export function GoogleCalendarProvider({ children }) {
   }, [auth]);
 
   const createEventForTodo = useCallback(async ({ title, description, dueDate, dueTime }) => {
-    const accessToken = requireToken();
     const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
+    if (auth?.demo) {
+      const existing = await ensureDemoSeed();
+      const { events, created } = addTodoToDemoCalendar(existing, {
+        title,
+        description,
+        dueDate,
+        dueTime,
+        timeZone,
+      });
+      await saveDemoEvents(events);
+      return created;
+    }
+    const accessToken = requireToken();
     const event = buildCalendarEvent({ title, description, dueDate, dueTime, timeZone });
     return createCalendarEvent({ accessToken, event });
-  }, [requireToken]);
+  }, [auth, requireToken]);
 
   const removeEvent = useCallback(async (eventId) => {
     if (!eventId) {
       return { alreadyGone: true };
     }
+    if (auth?.demo || String(eventId).startsWith('demo-')) {
+      const existing = (await loadDemoEvents()) || [];
+      await saveDemoEvents(removeDemoEvent(existing, eventId));
+      return { alreadyGone: !existing.some((event) => event.id === eventId) };
+    }
     const accessToken = requireToken();
     return deleteCalendarEvent({ accessToken, eventId });
-  }, [requireToken]);
+  }, [auth, requireToken]);
 
   const loadUpcoming = useCallback(async () => {
+    if (auth?.demo) {
+      const events = await ensureDemoSeed();
+      return listUpcomingDemoEvents(events);
+    }
     const accessToken = requireToken();
     return listUpcomingEvents({
       accessToken,
       timeMin: new Date().toISOString(),
     });
-  }, [requireToken]);
+  }, [auth, requireToken]);
+
+  const resetDemo = useCallback(async () => {
+    const seeded = seedDemoEvents();
+    await saveDemoEvents(seeded);
+    const next = demoSession();
+    await saveCalendarAuth(next);
+    leftDemo.current = false;
+    setAuth(next);
+    setErrorMessage('');
+    return listUpcomingDemoEvents(seeded);
+  }, []);
 
   const value = useMemo(() => ({
     ready,
+    isDemo,
     isConfigured: ids.isConfigured,
     isConnected: Boolean(auth?.accessToken && auth.expiresAt > Date.now()),
     email: auth?.email || '',
@@ -211,6 +306,7 @@ export function GoogleCalendarProvider({ children }) {
     errorMessage,
     connect,
     disconnect,
+    resetDemo,
     createEventForTodo,
     removeEvent,
     loadUpcoming,
@@ -221,9 +317,11 @@ export function GoogleCalendarProvider({ children }) {
     disconnect,
     errorMessage,
     ids.isConfigured,
+    isDemo,
     loadUpcoming,
     ready,
     removeEvent,
+    resetDemo,
   ]);
 
   return (

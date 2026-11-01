@@ -60,7 +60,7 @@ const GoBackButton = ({label, onPress}) => {
 
 const AddNewToDoScreenMain = ({navigation}) => {
 
-  const { isConnected, createEventForTodo } = useGoogleCalendar();
+  const { isConnected, isDemo, createEventForTodo } = useGoogleCalendar();
 
   const GoBackButtonPress = () => {
     navigation.goBack();
@@ -88,7 +88,12 @@ const AddNewToDoScreenMain = ({navigation}) => {
     }
 
     if (addToCalendar && !isConnected) {
-      notify('Connect Google Calendar', 'Open Calendar from the home screen and sign in, then save again.');
+      notify(
+        isDemo ? 'Start the demo calendar' : 'Connect Google Calendar',
+        isDemo
+          ? 'Open Calendar and start the demo, then save again.'
+          : 'Open Calendar from the home screen and sign in, then save again.',
+      );
       return;
     }
 
@@ -125,7 +130,9 @@ const AddNewToDoScreenMain = ({navigation}) => {
     const updatedToDo = [...prevToDos, ToDo];
     await SaveToDo('myToDos', updatedToDo);
 
-    notify(calendarEventId ? 'Saved to your list and Google Calendar' : 'Saved');
+    notify(calendarEventId
+      ? (isDemo ? 'Saved to your list and the demo calendar' : 'Saved to your list and Google Calendar')
+      : 'Saved');
     setDescText('');
     setTitleText('');
     setDueDateText('');
