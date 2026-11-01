@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useCallback, useLayoutEffect } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
 
 import {
@@ -11,6 +11,10 @@ import {
   FlatList,
 } from 'react-native';
 import { LoadToDo, SaveToDo } from '../helperfunctions/StorageHelper';
+import { notify } from '../helperfunctions/notify';
+import { isDemoEventId } from '../calendar/demoCalendar';
+import { formatDueLabel } from '../calendar/eventPayload';
+import { useGoogleCalendar } from '../calendar/GoogleCalendarProvider';
 
 
 
@@ -31,6 +35,14 @@ const ToDoItems = ({ item, onDelete, onToggleComplete }) => {
       > </ExplandButton>
       </View>
       <Text style={[styles.ToDoItems, {color: item.isFinished ? '#888' : 'black', textDecorationLine: item.isFinished ? 'line-through' : 'none'}]}>{item.title}</Text>
+      {!!formatDueLabel(item.dueDate, item.dueTime) && (
+        <Text style={styles.DueText}>Due {formatDueLabel(item.dueDate, item.dueTime)}</Text>
+      )}
+      {!!item.calendarEventId && (
+        <Text style={styles.CalendarBadge}>
+          {isDemoEventId(item.calendarEventId) ? 'On calendar' : 'On Google Calendar'}
+        </Text>
+      )}
 
       {isExpanded && (
         <View style={styles.ExpandedContent}>
@@ -99,6 +111,19 @@ const ExplandButton = ({ onPress, isExpanded }) => {
 
 const MainHomeScreen = ({ navigation }) => {
 
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      headerRight: () => (
+        <TouchableOpacity
+          onPress={() => navigation.navigate('Calendar')}
+          style={{ paddingRight: 12 }}
+        >
+          <Text style={{ fontFamily: 'Pixelpurl', fontSize: 20, color: 'black' }}>Calendar</Text>
+        </TouchableOpacity>
+      ),
+    });
+  }, [navigation]);
+
   const getCatMood = () => {
     return ToDos.length > 2 
     ? require('../assets/catGifs/catMood2.gif') : require ('../assets/catGifs/catMood1.gif');
@@ -110,6 +135,7 @@ const MainHomeScreen = ({ navigation }) => {
   };
 
   const [ToDos, SetToDos] = useState([]);
+  const { removeEvent } = useGoogleCalendar();
 
   useFocusEffect(
     useCallback(() => {
@@ -129,9 +155,21 @@ const MainHomeScreen = ({ navigation }) => {
 
 
   const handleDelete = async (id) => {
+    const target = ToDos.find(todo => todo.id === id);
     const updatedList = ToDos.filter(todo => todo.id !== id);
     await SaveToDo('myToDos', updatedList);
     SetToDos(updatedList);
+
+    if (target?.calendarEventId) {
+      try {
+        await removeEvent(target.calendarEventId);
+      } catch (error) {
+        notify(
+          'Removed from the list',
+          error.message || 'The Google Calendar event is still on your calendar.',
+        );
+      }
+    }
   }
 
   const handleToggleComplete = async (id) => {
@@ -264,6 +302,22 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     width: '80%',
     borderRadius: 10,
+  },
+
+  DueText: {
+    fontFamily: 'Pixelpurl',
+    fontSize: 14,
+    color: '#333',
+    marginTop: 4,
+    textAlign: 'center',
+  },
+
+  CalendarBadge: {
+    fontFamily: 'Pixelpurl',
+    fontSize: 14,
+    color: '#3F51B5',
+    marginTop: 2,
+    textAlign: 'center',
   },
   ToDoItemsContainer: {
     width: 330,             

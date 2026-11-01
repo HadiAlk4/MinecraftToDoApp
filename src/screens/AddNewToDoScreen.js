@@ -1,5 +1,4 @@
 import React, {useState} from 'react';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   View,
   Text,
@@ -7,16 +6,23 @@ import {
   StyleSheet,
   TouchableOpacity,
   ImageBackground,
-  Alert,
+  ScrollView,
+  Switch,
 } from 'react-native';
 
 import { SaveToDo, LoadToDo } from '../helperfunctions/StorageHelper';
+import { notify } from '../helperfunctions/notify';
+import { isValidDue } from '../calendar/eventPayload';
+import { useGoogleCalendar } from '../calendar/GoogleCalendarProvider';
 
-function AddToDoObject (id, title, description, isFinished) {
+function AddToDoObject (id, title, description, isFinished, dueDate, dueTime, calendarEventId) {
   this.id = id;
   this.title = title;
   this.description = description;
   this.isFinished = isFinished;
+  this.dueDate = dueDate;
+  this.dueTime = dueTime;
+  this.calendarEventId = calendarEventId;
 }
 
 
@@ -54,6 +60,8 @@ const GoBackButton = ({label, onPress}) => {
 
 const AddNewToDoScreenMain = ({navigation}) => {
 
+  const { isConnected, isDemo, createEventForTodo } = useGoogleCalendar();
+
   const GoBackButtonPress = () => {
     navigation.goBack();
   }
@@ -61,30 +69,80 @@ const AddNewToDoScreenMain = ({navigation}) => {
   const SaveButtonPress = async () => {
 
     if(titleText == '' || descText == ''){
-      Alert.alert("Fields Cannot be Empty")
-    } else {
-      const ToDo = new AddToDoObject (
-        Date.now().toString(),
-        titleText,
-        descText,
-        false
-      );
-      Alert.alert("Save Button Clicked");
-      
-
-      const prevToDos  = await LoadToDo('myToDos') || [];
-
-      const updatedToDo = [...prevToDos, ToDo];
-
-      await SaveToDo('myToDos', updatedToDo); 
-      
-      setDescText('');
-      setTitleText('');
+      notify('Fields Cannot be Empty')
+      return;
     }
+
+    const dueDate = dueDateText.trim();
+    const dueTime = dueTimeText.trim();
+    const hasDue = dueDate !== '' || dueTime !== '';
+
+    if (hasDue && !isValidDue(dueDate, dueTime)) {
+      notify('Check the due date', 'Use YYYY-MM-DD and HH:MM, or leave both blank.');
+      return;
+    }
+
+    if (addToCalendar && !hasDue) {
+      notify('Add a due date', 'Google Calendar needs a date and time.');
+      return;
+    }
+
+    if (addToCalendar && !isConnected) {
+      notify(
+        'Sign in first',
+        isDemo
+          ? 'Open Calendar and use the demo sign-in, then save again.'
+          : 'Open Calendar from the home screen and sign in, then save again.',
+      );
+      return;
+    }
+
+    let calendarEventId = '';
+    if (addToCalendar) {
+      try {
+        const created = await createEventForTodo({
+          title: titleText,
+          description: descText,
+          dueDate,
+          dueTime,
+        });
+        if (!created.id) {
+          throw new Error('Google Calendar did not return an event id.');
+        }
+        calendarEventId = created.id;
+      } catch (error) {
+        notify('Calendar', error.message || 'Could not create the calendar event.');
+        return;
+      }
+    }
+
+    const ToDo = new AddToDoObject (
+      Date.now().toString(),
+      titleText,
+      descText,
+      false,
+      dueDate,
+      dueTime,
+      calendarEventId,
+    );
+
+    const prevToDos  = await LoadToDo('myToDos') || [];
+    const updatedToDo = [...prevToDos, ToDo];
+    await SaveToDo('myToDos', updatedToDo);
+
+    notify(calendarEventId ? 'Saved to your list and calendar' : 'Saved');
+    setDescText('');
+    setTitleText('');
+    setDueDateText('');
+    setDueTimeText('');
+    setAddToCalendar(false);
   }
 
   const [titleText, setTitleText] = useState('');
   const [descText, setDescText] = useState('');
+  const [dueDateText, setDueDateText] = useState('');
+  const [dueTimeText, setDueTimeText] = useState('');
+  const [addToCalendar, setAddToCalendar] = useState(false);
   const [descHeight, setDescHeight] = useState(50);
 
   const CHARS_PER_LINE = 29; 
@@ -105,8 +163,7 @@ const AddNewToDoScreenMain = ({navigation}) => {
 
   return (
   <ImageBackground style={ToDoStyles.ToDoContainer} source={require('../assets/images/ScrollBg.png')} resizeMode="stretch">
-
-    
+    <ScrollView contentContainerStyle={ToDoStyles.FormContent} style={ToDoStyles.FormScroll}>
 
     <Text style={ToDoStyles.TitleTextStyle}> Title </Text> 
 
@@ -117,6 +174,35 @@ const AddNewToDoScreenMain = ({navigation}) => {
     onChangeText={(text) => setTitleText(text)}
     />
 
+    <Text style={ToDoStyles.DueLabelStyle}> Due </Text>
+    <View style={ToDoStyles.DueRow}>
+      <TextInput
+        style={ToDoStyles.DueInputStyle}
+        placeholder="YYYY-MM-DD"
+        placeholderTextColor="#bbb"
+        value={dueDateText}
+        autoCapitalize="none"
+        onChangeText={setDueDateText}
+      />
+      <TextInput
+        style={ToDoStyles.DueInputStyle}
+        placeholder="HH:MM"
+        placeholderTextColor="#bbb"
+        value={dueTimeText}
+        autoCapitalize="none"
+        onChangeText={setDueTimeText}
+      />
+    </View>
+
+    <View style={ToDoStyles.CalendarRow}>
+      <Text style={ToDoStyles.CalendarLabel}>Add to Google Calendar</Text>
+      <Switch
+        value={addToCalendar}
+        onValueChange={setAddToCalendar}
+        trackColor={{ false: '#888', true: '#3F51B5' }}
+        thumbColor={addToCalendar ? '#F4EBD0' : '#f4f3f4'}
+      />
+    </View>
 
     <Text style={ToDoStyles.DescriptionTextStyle}> Description </Text> 
 
@@ -131,7 +217,7 @@ const AddNewToDoScreenMain = ({navigation}) => {
       
 
 
-    <View style={{ flexDirection: 'row', marginTop: 20, gap: 200, bottom: 200, position: 'absolute' }}>
+    <View style={ToDoStyles.ActionRow}>
     
     <View style={{ alignItems: 'center' }}>
       <GoBackButton label="back" onPress={GoBackButtonPress} />
@@ -145,6 +231,7 @@ const AddNewToDoScreenMain = ({navigation}) => {
 
     </View>
 
+    </ScrollView>
   </ImageBackground>
   );
 };
@@ -154,6 +241,23 @@ const ToDoStyles = StyleSheet.create ({
   ToDoContainer: {
     flex: 1,
     alignItems: 'center',
+  },
+
+  FormScroll: {
+    flex: 1,
+    width: '100%',
+  },
+
+  FormContent: {
+    alignItems: 'center',
+    paddingBottom: 40,
+  },
+
+  ActionRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    width: '100%',
+    marginTop: 28,
   },
 
   TitleTextStyle: {
@@ -180,9 +284,51 @@ const ToDoStyles = StyleSheet.create ({
     textAlign: 'center',
   },
 
+  DueLabelStyle: {
+    fontFamily: 'Pixelpurl',
+    fontSize: 36,
+    color: 'black',
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginTop: 12,
+  },
+
+  DueRow: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+
+  DueInputStyle: {
+    fontFamily: 'Pixelpurl',
+    height: 46,
+    width: 140,
+    borderColor: '#3F51B5',
+    borderWidth: 2,
+    borderRadius: 5,
+    paddingHorizontal: 8,
+    fontSize: 16,
+    backgroundColor: 'black',
+    color: 'white',
+    textAlign: 'center',
+  },
+
+  CalendarRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    marginTop: 12,
+  },
+
+  CalendarLabel: {
+    fontFamily: 'Pixelpurl',
+    fontSize: 16,
+    color: 'black',
+    width: 180,
+  },
+
   DescriptionTextStyle: {
     fontFamily: 'Pixelpurl',
-    fontSize: 60,
+    fontSize: 48,
     color: 'black',
     fontWeight: 'bold',
     textAlign: 'center',

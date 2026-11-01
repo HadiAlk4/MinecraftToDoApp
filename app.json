@@ -23,11 +23,16 @@
         "monochromeImage": "./assets/android-icon-monochrome.png"
       }
     },
-    "web": {
-      "favicon": "./assets/favicon.png"
+    "scheme": "mytodom2",
+    "web": {},
+    "extra": {
+      "googleWebClientId": "",
+      "googleIosClientId": "",
+      "googleAndroidClientId": ""
     },
     "plugins": [
-      "expo-font"
+      "expo-font",
+      "expo-web-browser"
     ]
   }
 }
