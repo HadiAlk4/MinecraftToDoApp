@@ -24,9 +24,7 @@
       }
     },
     "scheme": "mytodom2",
-    "web": {
-      "favicon": "./assets/favicon.png"
-    },
+    "web": {},
     "extra": {
       "googleWebClientId": "",
       "googleIosClientId": "",

@@ -7,6 +7,7 @@
     "android": "expo run:android",
     "ios": "expo run:ios",
     "web": "expo start --web",
+    "build:web": "expo export --platform web && node scripts/prepare-web.js",
     "test": "node --experimental-default-type=module --test src/calendar/*.test.js"
   },
   "dependencies": {
@@ -22,9 +23,11 @@
     "expo-status-bar": "~55.0.4",
     "expo-web-browser": "~55.0.20",
     "react": "19.2.0",
+    "react-dom": "19.2.0",
     "react-native": "0.83.2",
     "react-native-safe-area-context": "~5.6.2",
-    "react-native-screens": "~4.23.0"
+    "react-native-screens": "~4.23.0",
+    "react-native-web": "^0.21.0"
   },
   "private": true
 }
