@@ -40,7 +40,7 @@ const ToDoItems = ({ item, onDelete, onToggleComplete }) => {
       )}
       {!!item.calendarEventId && (
         <Text style={styles.CalendarBadge}>
-          {isDemoEventId(item.calendarEventId) ? 'On demo calendar' : 'On Google Calendar'}
+          {isDemoEventId(item.calendarEventId) ? 'On calendar' : 'On Google Calendar'}
         </Text>
       )}
 

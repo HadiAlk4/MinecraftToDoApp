@@ -1,4 +1,4 @@
-import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { Platform } from 'react-native';
 import Constants from 'expo-constants';
 import * as AuthSession from 'expo-auth-session';
@@ -16,7 +16,6 @@ import {
   addTodoToDemoCalendar,
   listUpcomingDemoEvents,
   removeDemoEvent,
-  seedDemoEvents,
 } from './demoCalendar';
 import { loadDemoEvents, saveDemoEvents } from './demoStore';
 import { buildCalendarEvent } from './eventPayload';
@@ -50,14 +49,8 @@ function demoSession() {
   };
 }
 
-async function ensureDemoSeed() {
-  const existing = await loadDemoEvents();
-  if (existing) {
-    return existing;
-  }
-  const seeded = seedDemoEvents();
-  await saveDemoEvents(seeded);
-  return seeded;
+async function currentDemoEvents() {
+  return (await loadDemoEvents()) || [];
 }
 
 function authFromAuthentication(authentication, previous) {
@@ -75,7 +68,6 @@ export function GoogleCalendarProvider({ children }) {
   const ids = useMemo(() => readClientIds(), []);
   const platformClientId = ids.platformClientId;
   const isDemo = Platform.OS === 'web' || !ids.isConfigured;
-  const leftDemo = useRef(false);
 
   const [request, response, promptAsync] = Google.useAuthRequest({
     clientId: platformClientId || 'unconfigured',
@@ -102,17 +94,7 @@ export function GoogleCalendarProvider({ children }) {
         }
         if (isDemo) {
           if (stored?.demo && stored.expiresAt > Date.now()) {
-            await ensureDemoSeed();
             setAuth(stored);
-            return;
-          }
-          if (Platform.OS === 'web' && !leftDemo.current) {
-            const next = demoSession();
-            await saveCalendarAuth(next);
-            await ensureDemoSeed();
-            if (active) {
-              setAuth(next);
-            }
           }
           return;
         }
@@ -195,8 +177,6 @@ export function GoogleCalendarProvider({ children }) {
     if (isDemo) {
       const next = demoSession();
       await saveCalendarAuth(next);
-      await ensureDemoSeed();
-      leftDemo.current = false;
       setAuth(next);
       setErrorMessage('');
       return { ok: true, reason: 'demo' };
@@ -217,9 +197,6 @@ export function GoogleCalendarProvider({ children }) {
   const disconnect = useCallback(async () => {
     const token = auth?.accessToken;
     const wasDemo = Boolean(auth?.demo);
-    if (wasDemo) {
-      leftDemo.current = true;
-    }
     setAuth(null);
     await clearCalendarAuth();
     if (!token || wasDemo) {
@@ -244,7 +221,7 @@ export function GoogleCalendarProvider({ children }) {
   const createEventForTodo = useCallback(async ({ title, description, dueDate, dueTime }) => {
     const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
     if (auth?.demo) {
-      const existing = await ensureDemoSeed();
+      const existing = await currentDemoEvents();
       const { events, created } = addTodoToDemoCalendar(existing, {
         title,
         description,
@@ -275,8 +252,7 @@ export function GoogleCalendarProvider({ children }) {
 
   const loadUpcoming = useCallback(async () => {
     if (auth?.demo) {
-      const events = await ensureDemoSeed();
-      return listUpcomingDemoEvents(events);
+      return listUpcomingDemoEvents(await currentDemoEvents());
     }
     const accessToken = requireToken();
     return listUpcomingEvents({
@@ -284,17 +260,6 @@ export function GoogleCalendarProvider({ children }) {
       timeMin: new Date().toISOString(),
     });
   }, [auth, requireToken]);
-
-  const resetDemo = useCallback(async () => {
-    const seeded = seedDemoEvents();
-    await saveDemoEvents(seeded);
-    const next = demoSession();
-    await saveCalendarAuth(next);
-    leftDemo.current = false;
-    setAuth(next);
-    setErrorMessage('');
-    return listUpcomingDemoEvents(seeded);
-  }, []);
 
   const value = useMemo(() => ({
     ready,
@@ -306,7 +271,6 @@ export function GoogleCalendarProvider({ children }) {
     errorMessage,
     connect,
     disconnect,
-    resetDemo,
     createEventForTodo,
     removeEvent,
     loadUpcoming,
@@ -321,7 +285,6 @@ export function GoogleCalendarProvider({ children }) {
     loadUpcoming,
     ready,
     removeEvent,
-    resetDemo,
   ]);
 
   return (

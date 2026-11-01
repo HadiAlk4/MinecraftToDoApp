@@ -89,9 +89,9 @@ const AddNewToDoScreenMain = ({navigation}) => {
 
     if (addToCalendar && !isConnected) {
       notify(
-        isDemo ? 'Start the demo calendar' : 'Connect Google Calendar',
+        'Sign in first',
         isDemo
-          ? 'Open Calendar and start the demo, then save again.'
+          ? 'Open Calendar and use the demo sign-in, then save again.'
           : 'Open Calendar from the home screen and sign in, then save again.',
       );
       return;
@@ -130,9 +130,7 @@ const AddNewToDoScreenMain = ({navigation}) => {
     const updatedToDo = [...prevToDos, ToDo];
     await SaveToDo('myToDos', updatedToDo);
 
-    notify(calendarEventId
-      ? (isDemo ? 'Saved to your list and the demo calendar' : 'Saved to your list and Google Calendar')
-      : 'Saved');
+    notify(calendarEventId ? 'Saved to your list and calendar' : 'Saved');
     setDescText('');
     setTitleText('');
     setDueDateText('');

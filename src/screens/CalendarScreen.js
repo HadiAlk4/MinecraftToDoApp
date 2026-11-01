@@ -24,7 +24,6 @@ const CalendarScreen = () => {
     errorMessage,
     connect,
     disconnect,
-    resetDemo,
     loadUpcoming,
   } = useGoogleCalendar();
 
@@ -70,12 +69,6 @@ const CalendarScreen = () => {
   const onConnectPress = async () => {
     setBusy(true);
     try {
-      if (isDemo && isConnected) {
-        const items = await resetDemo();
-        setEvents(items);
-        setListError('');
-        return;
-      }
       await connect();
     } finally {
       setBusy(false);
@@ -118,16 +111,14 @@ const CalendarScreen = () => {
         ) : (
           <View style={styles.panel}>
             <Text style={styles.status}>
-              {isDemo && isConnected
-                ? 'Demo calendar'
-                : isConnected
-                  ? `Signed in${email ? ` as ${email}` : ''}`
-                  : 'Not connected'}
+              {isConnected
+                ? `Signed in${email ? ` as ${email}` : ''}`
+                : 'Not signed in'}
             </Text>
 
             {isDemo && (
               <Text style={styles.help}>
-                Events stay in this browser. Nothing is sent to Google.
+                Demo sign-in. This does not use your Google account.
               </Text>
             )}
 
@@ -141,7 +132,7 @@ const CalendarScreen = () => {
             {!!listError && <Text style={styles.error}>{listError}</Text>}
 
             <TouchableOpacity
-              onPress={isDemo || !isConnected ? onConnectPress : onDisconnectPress}
+              onPress={isConnected ? onDisconnectPress : onConnectPress}
               disabled={busy}
             >
               <ImageBackground
@@ -149,11 +140,7 @@ const CalendarScreen = () => {
                 source={require('../assets/images/button.png')}
               >
                 <Text style={styles.actionText}>
-                  {busy
-                    ? 'Wait'
-                    : isDemo
-                      ? (isConnected ? 'Reset demo' : 'Start demo')
-                      : (isConnected ? 'Disconnect' : 'Connect')}
+                  {busy ? 'Wait' : isConnected ? 'Sign out' : 'Sign in'}
                 </Text>
               </ImageBackground>
             </TouchableOpacity>
@@ -164,7 +151,7 @@ const CalendarScreen = () => {
 
             {isConnected && !loadingEvents && events.length === 0 && !listError && (
               <Text style={styles.help}>
-                {isDemo ? 'Nothing coming up in the demo.' : 'Nothing coming up on your primary calendar.'}
+                {isDemo ? 'Nothing coming up yet. Add a to-do to put it here.' : 'Nothing coming up on your primary calendar.'}
               </Text>
             )}
 
